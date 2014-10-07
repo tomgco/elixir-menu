@@ -69,15 +69,15 @@ end
 
 defmodule Menu do
   def main(args) do
-    x_init = 1
-    y_init = 1
+    x_init = 3
+    y_init = 2
     width = 50
     # Start collection procs
     Menu.LinesServer.start_link
     Menu.StateServer.start_link
     Menu.ItemsServer.start_link
 
-    Menu.ItemsServer.set "Nom", 1, 2
+    Menu.ItemsServer.set "Nom", 5, 5
 
     Menu.StateServer.set :x_init, x_init
     Menu.StateServer.set :y_init, y_init
@@ -97,9 +97,11 @@ defmodule Menu do
 
     draw
 
+    reset
     Menu.write "Learn you the Elixir for much win. \n"
     Menu.write "Select an item \n"
-    Menu.write String.ljust <<9472 :: utf8>>, Menu.StateServer.get :width
+    Menu.write String.ljust(<<9472 :: utf8>>, Menu.StateServer.get :width) <> "\n"
+    add "Boooom"
   end
 
   def reset() do
@@ -153,6 +155,13 @@ defmodule Menu do
     end
   end
 
+  def add(label) do
+    index = Menu.ItemsServer.length
+    Menu.ItemsServer.set(label, Menu.StateServer.get(:x), Menu.StateServer.get(:y))
+    fillLine Menu.StateServer.get(:y)
+    Menu.StateServer.set(:y, Menu.StateServer.get(:y) + 1)
+  end
+
   def write(msg) do
     Charm.background :blue
     Charm.foreground :white
@@ -161,7 +170,7 @@ defmodule Menu do
     Enum.map(String.split(msg, "\n"), fn s ->
       l = String.length s
       case l do
-        l when l > 0 ->
+        l when l != 0 ->
           Charm.position Menu.StateServer.get(:x), Menu.StateServer.get(:y)
           Charm.write s
         _ ->
