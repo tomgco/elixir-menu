@@ -36,17 +36,17 @@ defmodule Menu.LinesServer do
   end
 
   @doc "Checks if the task has already executed"
-  def exists?(number) do
-    item = {number}
+  def exists?(key) do
+    item = {key, true}
     Agent.get(__MODULE__, fn set ->
       item in set
     end)
   end
 
   @doc "Marks a task as executed"
-  def set(number) do
-    item = {number}
-    Agent.update(__MODULE__, &Set.put(&1, number))
+  def set(key) do
+    item = {key, true}
+    Agent.update(__MODULE__, &Set.put(&1, item))
   end
 end
 
@@ -66,18 +66,15 @@ defmodule Menu.StateServer do
   end
 end
 
-
 defmodule Menu do
   def main(args) do
     x_init = 3
     y_init = 2
-    width = 50
+    width = 65 
     # Start collection procs
     Menu.LinesServer.start_link
     Menu.StateServer.start_link
     Menu.ItemsServer.start_link
-
-    Menu.ItemsServer.set "Nom", 5, 5
 
     Menu.StateServer.set :x_init, x_init
     Menu.StateServer.set :y_init, y_init
@@ -91,21 +88,38 @@ defmodule Menu do
     Menu.StateServer.set :size, width + 2 + 2 # width + padding left + padding right
 
     Charm.display :clear
-    reset
     Charm.display :bright
     Charm.cursor false
+    Charm.background :blue
+    Charm.foreground :white
 
-    draw
-
-    reset
+    Menu.reset
     Menu.write "Learn you the Elixir for much win. \n"
     Menu.write "Select an item \n"
-    Menu.write String.ljust(<<9472 :: utf8>>, Menu.StateServer.get :width) <> "\n"
-    add "Boooom"
+    Menu.write String.ljust("", Menu.StateServer.get(:width), 9472) <> "\n"
+
+    Menu.add "» HELLO WORLD"
+    Menu.add "» BABY STEPS"
+    Menu.add "» MY FIRST AGENT"
+    Menu.add "» MY FIRST GEN-SERVER"
+    Menu.add "» XXXXXXXXXXX"
+    Menu.add "» XXXXXXXXXXX"
+    Menu.add "» XXXXXXXXXXX"
+    Menu.add "» XXXXXXXXXXX"
+    Menu.add "» XXXXXXXXXXX"
+    Menu.add "» XXXXXXXXXXX"
+    Menu.add "» XXXXXXXXXXX"
+    Menu.add "» XXXXXXXXXXX"
+
+    Menu.write String.ljust("", Menu.StateServer.get(:width), 9472) <> "\n"
+    Menu.add "HELP"
+    Menu.add "EXIT"
+
+    draw
   end
 
   def reset() do
-    Charm.display :reset
+    Charm.reset
   end
 
   def fillLine_multiple(n, y) when n < 1 do
@@ -128,12 +142,14 @@ defmodule Menu do
 
   def draw_row(i) do
     length = Menu.ItemsServer.length
-    index = 0
     case length do
       length when length > 0 ->
         index = rem (i + length), length
         {label, x, y} = Menu.ItemsServer.at index
-        Charm.write label <> String.ljust(" ", max(0, Menu.StateServer.get(:width) - String.length(label)))
+        Charm.position x, y
+        Charm.background :blue
+        Charm.foreground :white
+        Charm.write String.ljust(label, max(0, Menu.StateServer.get(:width) - String.length(label)))
       _ ->
     end
   end
@@ -157,9 +173,10 @@ defmodule Menu do
 
   def add(label) do
     index = Menu.ItemsServer.length
-    Menu.ItemsServer.set(label, Menu.StateServer.get(:x), Menu.StateServer.get(:y))
-    fillLine Menu.StateServer.get(:y)
-    Menu.StateServer.set(:y, Menu.StateServer.get(:y) + 1)
+    {x, y} = { Menu.StateServer.get(:x), Menu.StateServer.get(:y) }
+    Menu.ItemsServer.set(label, x, y)
+    fillLine y
+    Menu.StateServer.set(:y, y + 1)
   end
 
   def write(msg) do
