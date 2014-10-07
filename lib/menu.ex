@@ -1,5 +1,3 @@
-import Charm
-
 defmodule Menu.ItemsServer do
   def start_link do
     Agent.start_link(fn -> HashSet.new end, name: __MODULE__)
@@ -25,7 +23,7 @@ defmodule Menu.ItemsServer do
 
   def length() do
     Agent.get(__MODULE__, fn set ->
-      Enum.count(set, fn n -> true end)
+      Enum.count(set, fn n -> n end)
     end)
   end
 end
@@ -172,7 +170,7 @@ defmodule Menu do
   end
 
   def add(label) do
-    index = Menu.ItemsServer.length
+    #index = Menu.ItemsServer.length
     {x, y} = { Menu.StateServer.get(:x), Menu.StateServer.get(:y) }
     Menu.ItemsServer.set(label, x, y)
     fillLine y
