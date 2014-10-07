@@ -1,89 +1,9 @@
-defmodule Menu.ItemsServer do
-  def start_link do
-    Agent.start_link(fn -> HashSet.new end, name: __MODULE__)
-  end
-
-  def exists?(label, x, y) do
-    item = {label, x, y}
-    Agent.get(__MODULE__, fn set ->
-      item in set
-    end)
-  end
-
-  def set(label, x, y) do
-    item = {label, x, y}
-    Agent.update(__MODULE__, &Set.put(&1, item))
-  end
-
-  def at(index) do
-    Agent.get(__MODULE__, fn set ->
-      Enum.at(set, index)
-    end)
-  end 
-
-  def length() do
-    Agent.get(__MODULE__, fn set ->
-      Enum.count(set, fn n -> n end)
-    end)
-  end
-end
-
-defmodule Menu.LinesServer do
-  def start_link do
-    Agent.start_link(fn -> HashSet.new end, name: __MODULE__)
-  end
-
-  @doc "Checks if the task has already executed"
-  def exists?(key) do
-    item = {key, true}
-    Agent.get(__MODULE__, fn set ->
-      item in set
-    end)
-  end
-
-  @doc "Marks a task as executed"
-  def set(key) do
-    item = {key, true}
-    Agent.update(__MODULE__, &Set.put(&1, item))
-  end
-end
-
-defmodule Menu.StateServer do
-  def start_link do
-    Agent.start_link(fn -> HashDict.new end, name: __MODULE__)
-  end
-
-  @doc "Marks a task as executed"
-  def set(key, value) do
-    Agent.update(__MODULE__, &HashDict.put(&1, key, value))
-  end
-
-  @doc "Marks a task as executed"
-  def get(key) do
-    Agent.get(__MODULE__, &HashDict.get(&1, key))
-  end
-end
-
 defmodule Menu do
   def main(args) do
-    x_init = 3
-    y_init = 2
-    width = 65 
     # Start collection procs
     Menu.LinesServer.start_link
     Menu.StateServer.start_link
     Menu.ItemsServer.start_link
-
-    Menu.StateServer.set :x_init, x_init
-    Menu.StateServer.set :y_init, y_init
-    Menu.StateServer.set :x, x_init + 2
-    Menu.StateServer.set :y, y_init + 2
-    Menu.StateServer.set :padding_left, 2
-    Menu.StateServer.set :padding_right, 2
-    Menu.StateServer.set :padding_top, 1
-    Menu.StateServer.set :padding_bottom, 1
-    Menu.StateServer.set :width, width
-    Menu.StateServer.set :size, width + 2 + 2 # width + padding left + padding right
 
     Charm.display :clear
     Charm.display :bright
