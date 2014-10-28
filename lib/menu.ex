@@ -6,13 +6,14 @@ defmodule Menu do
     Menu.ItemsServer.start_link
 
     Charm.display :clear
+    Menu.reset
     Charm.display :bright
     Charm.cursor false
     Charm.background :blue
     Charm.foreground :white
 
-    Menu.reset
     Menu.write "Learn you the Elixir for much win. \n"
+    Charm.display :faint
     Menu.write "Select an item \n"
     Menu.write String.ljust("", Menu.StateServer.get(:width), 9472) <> "\n"
 

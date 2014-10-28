@@ -15,6 +15,7 @@ defmodule Menu.StateServer do
     Menu.StateServer.set :padding_bottom, 1
     Menu.StateServer.set :width, width
     Menu.StateServer.set :size, width + 2 + 2 # width + padding left + padding right
+    Menu.StateServer.set :position, 0
   end
 
   @doc "Marks a task as executed"
