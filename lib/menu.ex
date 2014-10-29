@@ -1,4 +1,8 @@
 defmodule Menu do
+  def main() do
+    main []
+  end
+
   def main(args) do
     # Start collection procs
     Menu.LinesServer.start_link
@@ -31,10 +35,9 @@ defmodule Menu do
     Menu.add "» XXXXXXXXXXX"
 
     Menu.write String.ljust("", Menu.StateServer.get(:width), 9472) <> "\n"
-    Menu.add "HELP"
-    Menu.add "EXIT"
 
     draw
+    IO.write "\n"
   end
 
   def reset() do
